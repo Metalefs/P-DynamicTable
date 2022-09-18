@@ -1,0 +1,350 @@
+<p-table *ngIf="isLoading; else normal" [columns]="table?.columns" [value]="[1]">
+  <ng-template pTemplate="caption" *ngIf="showSearch">
+    <div class="d-block">
+      <div class="form-group inner-addon right-addon mb-0">
+        <i class="fa fa-search mt-0 right-0" aria-hidden="true"></i>
+        <input
+          type="text"
+          class="form-control"
+          [placeholder]="'search'"
+        />
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="headergrouped" let-columns>
+    <tr>
+      <th *ngFor="let col of columns" scope="col">
+        {{ col.header }}
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body">
+    <tr>
+      <td *ngFor="let item of columns">
+        <p-skeleton></p-skeleton>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<ng-template #normal>
+  <p-table
+    #ptable
+    [columns]="table?.oldColumns!"
+    [value]="table?.oldValue!"
+    dataKey="id"
+    [paginator]="showPaginator"
+    [rows]="rows"
+    [totalRecords]="totalRecords"
+    [first]="first"
+    [lazy]="lazy"
+    [sortMode]="sortMode"
+    (onLazyLoad)="onLazyLoad.emit($event)"
+    [loading]="loading"
+    selectionMode="single"
+    [scrollHeight]="scrollHeight"
+    [scrollable]="scrollable"
+    [scrollDirection]="scrollDirection"
+    [showCurrentPageReport]="showCurrentPageReport"
+    [currentPageReportTemplate]="'Showing {first} To {last} Of {totalRecords} Entries'"
+    styleClass="paginator-right {{ customClass }}"
+  >
+    <!-- CAPTION -->
+    <ng-template pTemplate="caption" *ngIf="showSearch">
+      <div class="d-block">
+        <div class="form-group inner-addon right-addon mb-0 ml-auto">
+          <i class="fa fa-search mt-0 right-0" aria-hidden="true"></i>
+          <input
+            type="text"
+            (input)="ptable.filterGlobal($event.target, 'contains')"
+            class="form-control"
+            [placeholder]="'search'"
+          />
+        </div>
+      </div>
+    </ng-template>
+    <!-- END CAPTION -->
+
+    <!-- HEADER -->
+    <ng-template pTemplate="headergrouped" let-columns>
+      <tr>
+        <th
+          *ngFor="let col of table.columns"
+          scope="col"
+          [pSortableColumn]="(col.sortBy || col.prop)"
+        >
+
+          {{ col.name }}
+          <p-sortIcon
+            *ngIf="showSortIcon"
+            [field]="col.sortBy || col.prop"
+          ></p-sortIcon>
+        </th>
+      </tr>
+    </ng-template>
+    <!-- END HEADER -->
+
+    <!-- BODY -->
+    <ng-template
+      pTemplate="body"
+      let-rowData
+      let-columns="columns"
+      let-rowIndex="rowIndex"
+    >
+      <tr [pSelectableRow]="rowData" [pSelectableRowIndex]="rowIndex" >
+        <td
+          *ngFor="let data of filterTableDataWithRowData(rowData)[0]; let idxTd = index"
+        >
+          <div class="d-flex align-items-center">
+            <ng-container [ngSwitch]="table.columns[idxTd].type">
+              <ng-container
+                *ngSwitchCase="columnType.id"
+                [ngTemplateOutlet]="id"
+                [ngTemplateOutletContext]="{
+                  content: data.content,
+                  className: data.className
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.icon"
+                [ngTemplateOutlet]="icon"
+                [ngTemplateOutletContext]="{
+                  content: data.content,
+                  className: data.className
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.status"
+                [ngTemplateOutlet]="status"
+                [ngTemplateOutletContext]="{
+                  text: data.content,
+                  icon: data.icon,
+                  colorClass: data.colorClass,
+                  className: data.className
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.link"
+                [ngTemplateOutlet]="link"
+                [ngTemplateOutletContext]="{
+                  text: data.content,
+                  className: data.className
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.text"
+                [ngTemplateOutlet]="text"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.date"
+                [ngTemplateOutlet]="date"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.boolean"
+                [ngTemplateOutlet]="boolean"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.decimal"
+                [ngTemplateOutlet]="decimal"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.unmasked"
+                [ngTemplateOutlet]="unmasked"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.masked"
+                [ngTemplateOutlet]="masked"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.currency"
+                [ngTemplateOutlet]="currency"
+                [ngTemplateOutletContext]="{
+                  col: table.columns[idxTd],
+                  rowData: data,
+                  rowIndex: rowIndex
+                }"
+              ></ng-container>
+              <ng-container
+                *ngSwitchCase="columnType.actions"
+                [ngTemplateOutlet]="action"
+                [ngTemplateOutletContext]="{
+                  actions: data.actions,
+                  content: data.content,
+                  row: data,
+                  idx: rowIndex
+                }"
+              ></ng-container>
+            </ng-container>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <!-- END BODY -->
+  </p-table>
+
+  <ng-template #id let-content="content">
+    {{ content }}
+  </ng-template>
+
+  <ng-template #icon let-content="content">
+    <mat-icon class="text-primary mr-1">{{ content }}</mat-icon>
+  </ng-template>
+
+  <ng-template
+    #status
+    let-text="text"
+    let-icon="icon"
+    let-className="className"
+    let-colorClass="colorClass"
+  >
+    <span *ngIf="icon" class="material-icons-outlined {{ icon }} {{colorClass}}"></span>
+    <div style="padding: 0px 8px;">
+      <div  *ngIf="!icon" class="{{colorClass}}"></div>
+    </div>
+    <span class="{{ className }}">{{ text }}</span>
+  </ng-template>
+
+  <ng-template
+    #action
+    let-content="content"
+    let-actions="actions"
+    let-idx="idx"
+    let-row="row"
+  >
+    <ng-container *ngFor="let action of actions">
+      <a
+        class="link-primary"
+        (click)="action.onClick(idx)"
+        [routerLink]="null"
+      >
+        {{ action.name }}
+      </a>
+    </ng-container>
+  </ng-template>
+
+  <ng-template
+    #link
+    let-text="text"
+    let-color="color"
+    let-className="className"
+  >
+    <a
+      class="link-primary"
+      (click)="null"
+      [routerLink]="text"
+    >
+      {{ text }}
+    </a>
+
+  </ng-template>
+
+  <ng-template
+    #date
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+    <span>{{ rowData.content | date: "MM/dd/yyyy":"+0000" }}</span>
+  </ng-template>
+
+  <ng-template
+    #boolean
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+    <span>
+      <span *ngIf="rowData?.content">Yes</span>
+      <span *ngIf="!rowData?.content">No</span>
+    </span>
+  </ng-template>
+
+  <ng-template
+    #decimal
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+    <span>
+      {{ rowData.content | number: "1.2-" + decimalNumbers }}
+    </span>
+  </ng-template>
+
+  <ng-template
+    #masked
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+    <span *ngIf="col.mask !== null; else unmasked">
+      {{ rowData.content | mask: col.mask }}
+    </span>
+  </ng-template>
+
+  <ng-template
+    #unmasked
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+    {{ rowData.content }}
+  </ng-template>
+
+  <ng-template
+    #currency
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+    <span>
+      {{ rowData.content | currency: "symbol-narrow" }}
+    </span>
+  </ng-template>
+
+  <ng-template
+    #text
+    let-col="col"
+    let-rowData="rowData"
+    let-rowIndex="rowIndex"
+  >
+   {{rowData.content}}
+  </ng-template>
+</ng-template>
+
+<ng-template #delete let-rowData="rowData" let-rowIndex="rowIndex">
+  <a href="javascript:;" class="btn" (click)="rowDeleted.emit(rowIndex)">
+    <span class="float-right material-icons-outlined pos-absolute"
+      >delete_outline</span
+    >
+  </a>
+</ng-template>
